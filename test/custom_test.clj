@@ -3,8 +3,18 @@
             [logical-interpreter :refer :all]))
 
 (def incomplete-database "
-  varon(juan).
-  varon
+varon(juan).
+varon(pepe).
+varon(hector).
+varon(roberto).
+varon(alejandro).
+mujer(maria).
+mujer(cecilia).
+padre(juan, pepe).
+padre(juan, pepa).
+padre(hector, maria).
+padre(roberto, alejandro).
+padre(roberto, cecilia).
 ")
 
 (deftest custom-fact-test
