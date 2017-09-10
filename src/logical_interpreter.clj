@@ -28,23 +28,23 @@
 )  
 
 
-(defn vector-has-string
+(defn get-result-for-fact
       [query,factsVector]
-    (if (some #(= query %) factsVector) 
-    "true"
-    "false"
+      (println query)
+      (println factsVector)
+    (if (some #(= query %) factsVector)
+      true
+      false
     )            
 )
 
 
-(defn get-result-for-fact
-        [query,factsVector]
-
-    (if (.endsWith query ")")
-      (vector-has-string (clojure.string/replace query ")" ").") factsVector)
-      (vector-has-string query factsVector)
-    )
-
+(defn getNewQuery
+      [query]
+      (if (.endsWith query ")")
+        (clojure.string/replace query ")" ").")
+        query
+      )
 )
 
 (defn clear-vector
@@ -77,20 +77,26 @@
     (def ruleWithTestParameters (clojure.string/replace ruleWithTestParameters "), " ") ,  "))
     (def ruleFactsComponents (clojure.string/split (get (clojure.string/split ruleWithTestParameters #":-")1) #" , "))
 
-    (def result (vector))
-    (doseq [factComponentQuery ruleFactsComponents]
+    (def resultsForAllFacts (vector))
 
+
+    (doseq [factComponentQuery ruleFactsComponents]
       (def parsedFactsOrRuleVector (get parsedMap (str " " (get (clojure.string/split factComponentQuery #"\((.*)") 0) ) ) )
-       (if (get-result-for-fact (str " " factComponentQuery) parsedFactsOrRuleVector)
-          (def result (conj result "true"))  
-          (def result (conj result "false"))  
+       
+       
+       (def factResutl (get-result-for-fact (str " " (getNewQuery factComponentQuery)) parsedFactsOrRuleVector))
+       (println "result for fact")
+       (println factResutl)
+       (if (= factResutl true)
+          (def resultsForAllFacts (conj resultsForAllFacts "true"))  
+          (def resultsForAllFacts (conj resultsForAllFacts "false"))  
         )
+       (println resultsForAllFacts)
     )
 
-    (println result)
-    (if (some #(= "false" %) result) 
-      (println "false")
-      (println "true")
+    (if (some #(= "false" %) resultsForAllFacts) 
+      false
+      true
     )
 
 )
@@ -115,8 +121,6 @@
   (def databaseVector (clojure.string/split-lines database))
   (def parsedmap (data-array-to-hash databaseVector))
   (def parsedFactsOrRuleVector (get parsedmap (str "  " (get (clojure.string/split query #"\((.*)") 0) )) )
-  ;;(println parsedFactsOrRuleVector)
-
 
   (if (query-is-a-rule query parsedFactsOrRuleVector)
     (get-result-for-rule query parsedFactsOrRuleVector parsedmap)
