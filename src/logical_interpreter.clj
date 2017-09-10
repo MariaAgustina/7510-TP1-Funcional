@@ -5,12 +5,12 @@
 
     (def keysVector(vector))
    (doseq [query dataArray]
-      (def querykey (get (clojure.string/split query #"\((.*)") 0))
-;;      (println(clojure.string/split  querykey #"( *)(.*)"))
+      (def querykey (clojure.string/trim(get (clojure.string/split query #"\((.*)") 0)))
       (def keysVector (conj keysVector querykey))
       )
 
    (def filteredKeysVector (distinct keysVector))
+  ;;(println filteredKeysVector)
 
    (def parsedMap (hash-map))
    (doseq [filteredKey filteredKeysVector]
@@ -18,9 +18,9 @@
     )
 
   (doseq [query dataArray]
-    (def querykey (get (clojure.string/split query #"\((.*)") 0))
+    (def querykey (clojure.string/trim (get (clojure.string/split query #"\((.*)") 0 )))
     (def vectorValue (get parsedMap querykey))
-    (def newVector (conj vectorValue query))  
+    (def newVector (conj vectorValue (clojure.string/trim query)))  
     (def parsedMap (assoc parsedMap querykey newVector))    
   )
   ;;(println parsedMap)
@@ -30,8 +30,8 @@
 
 (defn get-result-for-fact
       [query,factsVector]
-      ;;(println query)
-      ;;(println factsVector)
+ ;;     (println query)
+ ;;     (println factsVector)
     (if (some #(= query %) factsVector)
       true
       false
@@ -67,6 +67,9 @@
     (def vectorQueryParamenters (clear-vector (clojure.string/split queryParameters #", ")))
     (def vectorParamenters (clear-vector (clojure.string/split parameters #", ")))
     
+    (println vectorQueryParamenters)
+    (println vectorParamenters)
+
     (def ruleWithTestParameters (clojure.string/replace rule "" ""))
     (doseq [parameter vectorParamenters]
      (def position (.indexOf vectorParamenters parameter))
@@ -74,17 +77,19 @@
       (def ruleWithTestParameters (clojure.string/replace ruleWithTestParameters parameter queryParameter))
     )
 
-    (def ruleWithTestParameters (clojure.string/replace ruleWithTestParameters "), " ") ,  "))
+    (def ruleWithTestParameters (clojure.string/replace ruleWithTestParameters "), " ") , "))
     (def ruleFactsComponents (clojure.string/split (get (clojure.string/split ruleWithTestParameters #":-")1) #" , "))
 
+    (println ruleFactsComponents)
     (def resultsForAllFacts (vector))
 
 
     (doseq [factComponentQuery ruleFactsComponents]
-      (def parsedFactsOrRuleVector (get parsedMap (str " " (get (clojure.string/split factComponentQuery #"\((.*)") 0) ) ) )
+      (def parsedFactsOrRuleVector (get parsedMap (clojure.string/trim(get (clojure.string/split factComponentQuery #"\((.*)") 0) ) ) )
+       (println parsedFactsOrRuleVector)
+       (println factComponentQuery)
        
-       
-       (def factResutl (get-result-for-fact (str " " (getNewQuery factComponentQuery)) parsedFactsOrRuleVector))
+       (def factResutl (get-result-for-fact (getNewQuery (clojure.string/trim factComponentQuery)) parsedFactsOrRuleVector))
      ,;  (println "result for fact")
        ;;(println factResutl)
        (if (= factResutl true)
@@ -114,7 +119,7 @@
 
 (defn is-wrong-query
     [query]
-    (println(re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)) 
+   ;; (println(re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)) 
     (if (re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)
       nil
       true
@@ -137,7 +142,7 @@
     ;;se elimina el primer elemento que esta vacio
     (def lastPosition (.indexOf databaseVector (last databaseVector)))
     (def newDatabaseVector(subvec databaseVector 1 (+ lastPosition 1)))
-    (println newDatabaseVector)
+    ;;(println newDatabaseVector)
     (def isARule)
     (def resultsVector (vector))
     (doseq [factOrRule newDatabaseVector]
@@ -167,11 +172,12 @@
       (do
           (def databaseVector (clojure.string/split-lines database))
           (def parsedmap (data-array-to-hash databaseVector))
-          (def parsedFactsOrRuleVector (get parsedmap (str "  " (get (clojure.string/split query #"\((.*)") 0) )) )
+          (def parsedFactsOrRuleVector (get parsedmap (get (clojure.string/split query #"\((.*)") 0) ) )
+          ;;(println parsedFactsOrRuleVector)
 
           (if (query-is-a-rule query parsedFactsOrRuleVector)
             (get-result-for-rule query parsedFactsOrRuleVector parsedmap)
-            (get-result-for-fact (str "  " (getNewQuery query)) parsedFactsOrRuleVector)
+            (get-result-for-fact (getNewQuery query) parsedFactsOrRuleVector)
           )
       )
   )
