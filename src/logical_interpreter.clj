@@ -30,8 +30,8 @@
 
 (defn get-result-for-fact
       [query,factsVector]
-      (println query)
-      (println factsVector)
+      ;;(println query)
+      ;;(println factsVector)
     (if (some #(= query %) factsVector)
       true
       false
@@ -85,13 +85,13 @@
        
        
        (def factResutl (get-result-for-fact (str " " (getNewQuery factComponentQuery)) parsedFactsOrRuleVector))
-       (println "result for fact")
-       (println factResutl)
+     ,;  (println "result for fact")
+       ;;(println factResutl)
        (if (= factResutl true)
           (def resultsForAllFacts (conj resultsForAllFacts "true"))  
           (def resultsForAllFacts (conj resultsForAllFacts "false"))  
         )
-       (println resultsForAllFacts)
+     ;;  (println resultsForAllFacts)
     )
 
     (if (some #(= "false" %) resultsForAllFacts) 
@@ -114,11 +114,43 @@
 
 (defn is-wrong-query
     [query]
-;;    "^[a-zA-Z0-9_]*$"
-  ;;(println(re-find #"^[a-zA-Z0-9_]*[\(][a-zA-Z0-9_]*[\)]*$" query))  
+    (println(re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)) 
     (if (re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)
       nil
       true
+    )
+)
+
+(defn is-wrong-rule
+    [rule]
+    ;;TODO: Para validar bien las rules se deben parsear los facts internos
+    (if  (re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)] :-" rule) 
+      nil
+      true
+    )
+)
+
+(defn is-wrong-database
+    [database] 
+    (def databaseVector  (clojure.string/split-lines database))
+    
+    ;;se elimina el primer elemento que esta vacio
+    (def lastPosition (.indexOf databaseVector (last databaseVector)))
+    (def newDatabaseVector(subvec databaseVector 1 (+ lastPosition 1)))
+    (println newDatabaseVector)
+    (def isARule)
+    (def resultsVector (vector))
+    (doseq [factOrRule newDatabaseVector]
+      (def isARule (.contains factOrRule ":-"))
+      (if isARule
+        (def resultsVector (conj resultsVector (is-wrong-rule factOrRule)))
+        (def resultsVector (conj resultsVector (is-wrong-query factOrRule))) 
+      )
+    )
+
+    (if (some #(= true %) resultsVector) 
+      true
+      nil
     )
 )
 
@@ -127,9 +159,11 @@
   "Returns true if the rules and facts in database imply query, false if not. If
   either input can't be parsed, returns nil"
   [database query]
-  
-  (if (is-wrong-query query)
-      (do nil)
+
+  (if (or (is-wrong-query query) (is-wrong-database database))
+      (do 
+          (println "wrong database or query")
+          nil)
       (do
           (def databaseVector (clojure.string/split-lines database))
           (def parsedmap (data-array-to-hash databaseVector))
