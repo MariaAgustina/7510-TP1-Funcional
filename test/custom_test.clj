@@ -20,18 +20,21 @@
 ")
 
 (deftest custom-fact-test
-  (testing "varon(juan). should be true"
-    (is (= (evaluate-query database "varon(juan).")
-           true))) 
-  (testing "varon(hector). should be true"
-    (is (= (evaluate-query database "varon(hector).")
-           true))) 
-  (testing "varon(maria). should be false"
-    (is (= (evaluate-query database "varon(maria).")
-           false))) 
-  (testing "mujer(cecilia). should be true"
-    (is (= (evaluate-query database "mujer(cecilia).")
-           true))))
+  (testing "varon(juan) should be true"
+    (is (= (evaluate-query database "varon(juan)")
+           true)))
+  (testing "varon(maria) should be false"
+    (is (= (evaluate-query database "varon(maria)")
+           false)))
+  (testing "mujer(cecilia) should be true"
+    (is (= (evaluate-query database "mujer(cecilia)")
+           true)))
+  (testing "padre(juan, pepe) should be true"
+    (is (= (evaluate-query database "padre(juan, pepe)")
+           true)))
+  (testing "padre(mario, pepe) should be false"
+    (is (= (evaluate-query database "padre(mario, pepe)")
+           false))))
 
 (deftest parent-database-rule-test
   (testing "hijo(pepe, juan) should be true"
@@ -40,3 +43,8 @@
   (testing "hija(maria, roberto) should be false"
     (is (= (evaluate-query database "hija(maria, roberto)")
            false))))
+
+(deftest parent-database-empty-query-test
+  (testing "varon should be nil"
+    (is (= (evaluate-query database "varon")
+           nil))))

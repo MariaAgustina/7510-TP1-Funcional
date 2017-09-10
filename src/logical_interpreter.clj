@@ -112,19 +112,34 @@
       )
 )
 
+(defn is-wrong-query
+    [query]
+;;    "^[a-zA-Z0-9_]*$"
+  ;;(println(re-find #"^[a-zA-Z0-9_]*[\(][a-zA-Z0-9_]*[\)]*$" query))  
+    (if (re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)
+      nil
+      true
+    )
+)
+
 (defn evaluate-query
   
   "Returns true if the rules and facts in database imply query, false if not. If
   either input can't be parsed, returns nil"
   [database query]
+  
+  (if (is-wrong-query query)
+      (do nil)
+      (do
+          (def databaseVector (clojure.string/split-lines database))
+          (def parsedmap (data-array-to-hash databaseVector))
+          (def parsedFactsOrRuleVector (get parsedmap (str "  " (get (clojure.string/split query #"\((.*)") 0) )) )
 
-  (def databaseVector (clojure.string/split-lines database))
-  (def parsedmap (data-array-to-hash databaseVector))
-  (def parsedFactsOrRuleVector (get parsedmap (str "  " (get (clojure.string/split query #"\((.*)") 0) )) )
-
-  (if (query-is-a-rule query parsedFactsOrRuleVector)
-    (get-result-for-rule query parsedFactsOrRuleVector parsedmap)
-    (get-result-for-fact (str "  " query) parsedFactsOrRuleVector)
+          (if (query-is-a-rule query parsedFactsOrRuleVector)
+            (get-result-for-rule query parsedFactsOrRuleVector parsedmap)
+            (get-result-for-fact (str "  " (getNewQuery query)) parsedFactsOrRuleVector)
+          )
+      )
   )
 
-  )
+)
