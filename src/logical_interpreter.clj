@@ -10,7 +10,6 @@
       )
 
    (def filteredKeysVector (distinct keysVector))
-  ;;(println filteredKeysVector)
 
    (def parsedMap (hash-map))
    (doseq [filteredKey filteredKeysVector]
@@ -23,15 +22,12 @@
     (def newVector (conj vectorValue (clojure.string/trim query)))  
     (def parsedMap (assoc parsedMap querykey newVector))    
   )
-  ;;(println parsedMap)
   parsedMap
 )  
 
 
 (defn get-result-for-fact
       [query,factsVector]
- ;;     (println query)
- ;;     (println factsVector)
     (if (some #(= query %) factsVector)
       true
       false
@@ -66,9 +62,6 @@
 
     (def vectorQueryParamenters (clear-vector (clojure.string/split queryParameters #", ")))
     (def vectorParamenters (clear-vector (clojure.string/split parameters #", ")))
-    
-    (println vectorQueryParamenters)
-    (println vectorParamenters)
 
     (def ruleWithTestParameters (clojure.string/replace rule "" ""))
     (doseq [parameter vectorParamenters]
@@ -80,23 +73,16 @@
     (def ruleWithTestParameters (clojure.string/replace ruleWithTestParameters "), " ") , "))
     (def ruleFactsComponents (clojure.string/split (get (clojure.string/split ruleWithTestParameters #":-")1) #" , "))
 
-    (println ruleFactsComponents)
     (def resultsForAllFacts (vector))
 
-
     (doseq [factComponentQuery ruleFactsComponents]
-      (def parsedFactsOrRuleVector (get parsedMap (clojure.string/trim(get (clojure.string/split factComponentQuery #"\((.*)") 0) ) ) )
-       (println parsedFactsOrRuleVector)
-       (println factComponentQuery)
-       
+      (def parsedFactsOrRuleVector (get parsedMap (clojure.string/trim(get (clojure.string/split factComponentQuery #"\((.*)") 0) ) ) )       
        (def factResutl (get-result-for-fact (getNewQuery (clojure.string/trim factComponentQuery)) parsedFactsOrRuleVector))
-     ,;  (println "result for fact")
-       ;;(println factResutl)
+
        (if (= factResutl true)
           (def resultsForAllFacts (conj resultsForAllFacts "true"))  
           (def resultsForAllFacts (conj resultsForAllFacts "false"))  
         )
-     ;;  (println resultsForAllFacts)
     )
 
     (if (some #(= "false" %) resultsForAllFacts) 
@@ -118,8 +104,7 @@
 )
 
 (defn is-wrong-query
-    [query]
-   ;; (println(re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)) 
+    [query] 
     (if (re-find #"[a-zA-Z0-9_]*[\(][a-zA-Z0-9_, ]*[\)]" query)
       nil
       true
@@ -142,7 +127,7 @@
     ;;se elimina el primer elemento que esta vacio
     (def lastPosition (.indexOf databaseVector (last databaseVector)))
     (def newDatabaseVector(subvec databaseVector 1 (+ lastPosition 1)))
-    ;;(println newDatabaseVector)
+
     (def isARule)
     (def resultsVector (vector))
     (doseq [factOrRule newDatabaseVector]
@@ -173,7 +158,6 @@
           (def databaseVector (clojure.string/split-lines database))
           (def parsedmap (data-array-to-hash databaseVector))
           (def parsedFactsOrRuleVector (get parsedmap (get (clojure.string/split query #"\((.*)") 0) ) )
-          ;;(println parsedFactsOrRuleVector)
 
           (if (query-is-a-rule query parsedFactsOrRuleVector)
             (get-result-for-rule query parsedFactsOrRuleVector parsedmap)
