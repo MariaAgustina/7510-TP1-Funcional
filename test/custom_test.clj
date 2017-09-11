@@ -15,6 +15,8 @@
   padre(hector, maria).
   padre(roberto, alejandro).
   padre(roberto, cecilia).
+  amigos(ricardo,agustin,jorge).
+  amigos(pedro,agustin,jorge).
   hijo(X, Y) :- varon(X), padre(Y, X).
   hija(X, Y) :- mujer(X), padre(Y, X).
 ")
@@ -34,6 +36,15 @@
            true)))
   (testing "padre(mario, pepe) should be false"
     (is (= (evaluate-query database "padre(mario, pepe)")
+           false)))
+  (testing "amigos(ricardo,agustin,jorge) should be true"
+    (is (= (evaluate-query database "amigos(ricardo,agustin,jorge)")
+           true)))
+  (testing "amigos(pedro,agustin,jorge) should be true"
+    (is (= (evaluate-query database "amigos(pedro,agustin,jorge)")
+           true)))
+  (testing "amigos(pedro,agustin,cecilia) should be false"
+    (is (= (evaluate-query database "amigos(pedro,agustin,cecilia)")
            false))))
 
 (deftest parent-database-rule-test
